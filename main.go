@@ -25,11 +25,14 @@ type changeLog struct {
 }
 
 type Section struct {
-	Version   string
-	Published string
-	Added     []string
-	Fixed     []string
-	Changed   []string
+	Version    string
+	Published  string
+	Added      []string
+	Changed    []string
+	Deprecated []string
+	Fixed      []string
+	Removed    []string
+	Security   []string
 }
 
 func run() error {
@@ -82,14 +85,22 @@ func (cl *changeLog) Transform(node *ast.Document, reader text.Reader, pc parser
 			}
 		case *ast.List:
 			for x := t.FirstChild(); x != nil; x = x.NextSibling() {
+				var section []*Section
 				switch h3 {
 				case "Added":
-					curr.Added = append(curr.Added, string(x.Text(reader.Source())))
-				case "Fixed":
-					curr.Fixed = append(curr.Fixed, string(x.Text(reader.Source())))
+					section = curr.Added
 				case "Changed":
-					curr.Changed = append(curr.Changed, string(x.Text(reader.Source())))
+					section = curr.Changed
+				case "Deprecated":
+					section = curr.Deprecated
+				case "Removed":
+					section = curr.Removed
+				case "Fixed":
+					section = curr.Fixed
+				case "Security":
+					section = curr.Security
 				}
+				section = append(section, string(x.Text(reader.Source())))
 			}
 		}
 	}
